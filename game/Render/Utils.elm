@@ -26,12 +26,15 @@ fullScreenMessage msg = msg
   |> toForm
   |> alpha 0.3
 
-baseText : String -> Text
-baseText s = s
+scaledText : Float -> String -> Text
+scaledText sc s = s
   |> toText
-  |> Text.height 15
+  |> Text.height (15.0 * sc)
   |> Text.color white
   |> typeface ["Inconsolata", "monospace"]
+
+baseText : String -> Text
+baseText = scaledText 1
 
 triangle : Float -> Bool -> Path
 triangle s isUpward =

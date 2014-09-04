@@ -101,7 +101,7 @@ getGatesMarks course =
 isStuck : Point -> GameState -> Bool
 isStuck p ({course} as gameState) =
   let gatesMarks = getGatesMarks course
-      boatWidth = 5.0
+      boatWidth = 5.0 * gameState.scale
       stuckOnMark = any (\m -> distance m p <= course.markRadius + course.boatWidth / 2) gatesMarks
       outOfBounds = not (inBox p course.bounds)
       onIsland = any (\i -> distance i.location p <= i.radius + course.boatWidth / 2) course.islands
@@ -122,16 +122,17 @@ getCenterAfterMove (x,y) (x',y') (cx,cy) (w,h) =
              | n' > mmax          -> c + (n' - n)
              | otherwise          -> c
   in
-    (refocus x x' cx w (w * 0.2), refocus y y' cy h (h * 0.4))
+    (refocus x x' cx w (w * 0.3), refocus y y' cy h (h * 0.4))
 
 movePlayer : Time -> Float -> GameState -> (Int,Int) -> Player -> Player
-movePlayer now delta gameState dimensions player =
+movePlayer now delta gameState (w,h) player =
   let {position, direction, velocity, windAngle, crossedGates} = player
       newVelocity = playerVelocity player.windSpeed player.windAngle velocity
       nextPosition = movePoint position delta newVelocity direction
       stuck = isStuck nextPosition gameState
       newPosition = if stuck then position else nextPosition
-      newCenter = getCenterAfterMove position newPosition player.center (floatify dimensions)
+      scaledDims = ((toFloat w) / gameState.scale, (toFloat h) / gameState.scale)
+      newCenter = getCenterAfterMove position newPosition player.center scaledDims
       newWake = take 20 (newPosition :: player.wake)
   in  { player | position <- newPosition,
                  velocity <- if stuck then 0 else newVelocity,
@@ -203,10 +204,21 @@ raceInputStep raceInput ({player} as gameState) =
                     countdown <- mapMaybe (\st -> st - now) startTime,
                     isMaster <- isMaster }
 
+zoomStep : KeyboardInput -> GameState -> GameState
+zoomStep keyboardInput gameState =
+  let maxScale = 2.0
+      minScale = 0.5
+      zoomedScale = gameState.scale + (0.02 * gameState.scale * (toFloat keyboardInput.zoom))
+      newScale = if | zoomedScale < minScale -> minScale
+                    | zoomedScale > maxScale -> maxScale
+                    | otherwise              -> zoomedScale
+  in  { gameState | scale <- newScale }
+
 stepGame : Input -> GameState -> GameState
 stepGame input gameState =
   mouseStep input.mouseInput
     <| moveStep input.raceInput.now input.delta input.windowInput
+    <| zoomStep input.keyboardInput
     <| keysStep input.keyboardInput
     <| windStep input.raceInput.wind
     <| raceInputStep input.raceInput gameState

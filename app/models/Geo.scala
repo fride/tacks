@@ -4,7 +4,7 @@ import Math._
 import play.api.libs.json._
 
 object Geo {
-  type Point = (Double,Double) // (x,y)
+  type Point = (Double,Double) // (x,y) in meters
   type Segment = (Point,Point)
   type Box = (Point,Point) // ((right,top),(left,bottom))
 

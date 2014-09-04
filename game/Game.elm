@@ -24,7 +24,7 @@ data GateLocation = StartLine | Downwind | Upwind
 
 type Gate = { y: Float, width: Float }
 type Island = { location : Point, radius : Float }
-type Course = 
+type Course =
   { upwind: Gate
   , downwind: Gate
   , laps: Int
@@ -80,6 +80,7 @@ type GameState =
   , playerSpell: Maybe Spell
   , triggeredSpells: [Spell]
   , isMaster: Bool
+  , scale: Float
   }
 
 type RaceState = { players : [Player] }
@@ -88,7 +89,7 @@ defaultGate : Gate
 defaultGate = { y = 0, width = 0 }
 
 defaultCourse : Course
-defaultCourse = 
+defaultCourse =
   { upwind = defaultGate
   , downwind = defaultGate
   , laps = 0
@@ -107,7 +108,7 @@ defaultPlayer =
   , windOrigin = 0
   , windSpeed = 0
   , wake = []
-  , center = (0,0)
+  , center = (0,-100)
   , controlMode = FixedDirection
   , tackTarget = Nothing
   , crossedGates = []
@@ -138,6 +139,7 @@ defaultGame =
   , playerSpell = Nothing
   , triggeredSpells = []
   , isMaster = False
+  , scale = 2
   }
 
 getGateMarks : Gate -> (Point,Point)

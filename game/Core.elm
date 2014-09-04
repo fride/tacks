@@ -1,7 +1,7 @@
 module Core where
 
 ensure360 : Float -> Float
-ensure360 val = 
+ensure360 val =
   let rounded = round val
       excess = val - (toFloat rounded)
   in  ((rounded + 360) `mod` 360 |> toFloat) + excess
@@ -27,15 +27,15 @@ polarVelocity : Float -> Float -> Float
 polarVelocity speed angle =
   let x1 = speed
       x2 = angle -- degrees
-      v = -2.067174789 * 10 ^ -3 * x1 ^ 3 - 1.868941044 * 10 ^ -4 * x1 ^ 2 * x2 
-          - 1.03401471 * 10 ^ -4 * x1 * x2 ^ 2 - 1.86799863 * 10 ^ -5 * x2 ^ 3 
-          + 7.376288713 * 10 ^ -2 * x1 ^ 2 + 3.19606466 * 10 ^ -2 * x1 * x2 
-          + 2.939457021 * 10 ^ -3 * x2 ^ 2 - 8.575945237 * 10 ^ -1 * x1 
+      v = -2.067174789 * 10 ^ -3 * x1 ^ 3 - 1.868941044 * 10 ^ -4 * x1 ^ 2 * x2
+          - 1.03401471 * 10 ^ -4 * x1 * x2 ^ 2 - 1.86799863 * 10 ^ -5 * x2 ^ 3
+          + 7.376288713 * 10 ^ -2 * x1 ^ 2 + 3.19606466 * 10 ^ -2 * x1 * x2
+          + 2.939457021 * 10 ^ -3 * x2 ^ 2 - 8.575945237 * 10 ^ -1 * x1
           + 9.427801906 * 10 ^ -5 * x2 + 4.342327445
-  in v * 2 -- pixel speed
+  in  v
 
 vmgValue : Float -> Float  -> Float
-vmgValue windSpeed windAngle = 
+vmgValue windSpeed windAngle =
   let windAngleRad = toRadians windAngle
       boatSpeed = polarVelocity windSpeed windAngle
   in  (sin windAngleRad) * boatSpeed |> abs

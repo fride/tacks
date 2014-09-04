@@ -2,7 +2,7 @@ module Geo where
 
 import Core
 
-type Point = (Float, Float)
+type Point = (Float, Float) -- (x,y) in meters
 type Segment = (Point, Point)
 
 floatify (x,y) = (toFloat x, toFloat y)
@@ -16,8 +16,8 @@ sub (x,y) (x',y') = (x' - x, y' - y)
 neg : Point -> Point
 neg (x,y) = (-x,-y)
 
-scale : Float -> Point -> Point
-scale s (x,y) = (x*s, y*s)
+scalePoint : Float -> Point -> Point
+scalePoint s (x,y) = (x*s, y*s)
 
 distance : Point -> Point -> Float
 distance (x,y) (x',y') =

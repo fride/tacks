@@ -20,13 +20,14 @@ Task: Redefine `UserInput` to include all of the information you need.
 
 type UserArrows = { x:Int, y:Int }
 
-type KeyboardInput = 
+type KeyboardInput =
   { arrows: UserArrows
   , lockAngle: Bool
   , tack: Bool
   , fineTurn: Bool
   , spellCast: Bool
   , startCountdown: Bool
+  , zoom: Int
   }
 
 type MouseInput = { drag: Maybe (Int,Int), mouse: (Int,Int) }
@@ -49,10 +50,18 @@ type RaceInput =
 mouseInput : Signal MouseInput
 mouseInput = lift2 MouseInput (Drag.lastPosition (20 * Time.millisecond)) Mouse.position
 
+zoomInput : Signal Int
+zoomInput = lift2 (\plus minus -> if | plus      -> 1
+                                     | minus     -> -1
+                                     | otherwise -> 0)
+                  (Keyboard.isDown (Char.toCode 'Z')) (Keyboard.isDown (Char.toCode 'U'))
+
 keyboardInput : Signal KeyboardInput
-keyboardInput = lift6 KeyboardInput 
+keyboardInput = lift7 KeyboardInput
   Keyboard.arrows Keyboard.enter Keyboard.space Keyboard.shift
   (Keyboard.isDown (Char.toCode 'S')) (Keyboard.isDown (Char.toCode 'C'))
+  zoomInput
+
 
 chrono : Signal Time
 chrono = foldp (+) 0 (fps 1)

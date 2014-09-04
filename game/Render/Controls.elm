@@ -46,7 +46,7 @@ renderPolar : Player -> (Float,Float) -> Form
 renderPolar player (w,h) =
   let
     absWindAngle = abs player.windAngle
-    anglePoint a = fromPolar ((polarVelocity player.windSpeed a), toRadians a)
+    anglePoint a = fromPolar ((polarVelocity player.windSpeed a) * 2, toRadians a)
     points = map anglePoint [0..180]
     maxSpeed = 100
     polar = path points |> traced (solid white)
@@ -97,9 +97,9 @@ renderStockSpell spell (w,h) =
         |> move (w/2 - 45, h/2 - 250)
 
 renderPoleInversion =
-  let arrow = map (scale 3) getArrow
-        |> polygon
+  let arrow = polygon getArrow
         |> filled white
+        |> scale 3
       leftArrow = arrow
         |> move (-1, 6)
       rightArrow = arrow

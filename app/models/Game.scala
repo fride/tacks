@@ -14,8 +14,8 @@ case object UpwindGate extends GateLocation
 case object DownwindGate extends GateLocation
 
 case class Gate(
-  y: Double,
-  width: Double
+  y: Double, // meters
+  width: Double // meters
 ) {
 
   def crossedInX(s: Segment) = {
@@ -41,7 +41,7 @@ case class Gate(
 
 case class Island(
   location: (Double,Double),
-  radius: Double
+  radius: Double // meters
 )
 
 case class WindGenerator(
@@ -94,10 +94,10 @@ case class Course(
 
 object Course {
   val default = Course(
-    upwind = Gate(2000, 150),
-    downwind = Gate(-100, 150),
+    upwind = Gate(2000, 100),
+    downwind = Gate(-100, 100),
     laps = 2,
-    markRadius = 5,
+    markRadius = 3,
     islands = Seq(
       Island((-250, 300), 90),
       Island((150, 900), 80),
@@ -113,18 +113,18 @@ object Course {
 case class Gust(
   position: Point,
   angle: Double, // degrees
-  speed: Double,
+  speed: Double, // knots?
   radius: Double,
-  maxRadius: Double,
+  maxRadius: Double, // meters
   spawnedAt: DateTime
 ) {
   val radians = angleToRadians(angle)
-  val pixelPerSecond = 1
+//  val pixelPerSecond = 1
   val maxRadiusAfterSeconds = 20
 
   def update(course: Course, wind: Wind, lastUpdate: DateTime, now: DateTime): Gust = {
     val delta = now.getMillis - lastUpdate.getMillis
-    val groundSpeed = (wind.speed + speed) * pixelPerSecond * 0.001
+    val groundSpeed = (wind.speed + speed) * 0.001
     val groundDirection = ensure360(angle + 180)
     val newPosition = movePoint(position, delta, groundSpeed, groundDirection)
     val radius = min((now.getMillis - spawnedAt.getMillis) * 0.001 * maxRadius / maxRadiusAfterSeconds, maxRadius)
@@ -149,7 +149,7 @@ object Gust {
 
 case class Wind(
   origin: Double,
-  speed: Double,
+  speed: Double, // m/s
   gusts: Seq[Gust]
 )
 
@@ -173,7 +173,7 @@ object Buoy {
   import scala.util.Random._
   def spawn(course: Course) = Buoy(
     position = course.randomPoint,
-    radius = 5,
+    radius = 2,
     spell = Spell(
       kind = nextInt(2) match {
         case 0 => "PoleInversion"
