@@ -31,17 +31,17 @@ renderGate gate markRadius isNext sc =
 renderPlayerAngles : Float -> Player -> Form
 renderPlayerAngles sc player =
   let windOriginRadians = toRadians (player.direction - player.windAngle)
-      windMarker = polygon [(0,4),(-4,-4),(4,-4)]
+      windMarker = polygon [(0,4),(-3,-4),(3,-4)]
         |> filled white
         |> rotate (windOriginRadians + pi/2)
         |> scale sc
-        |> move (scalePoint sc (fromPolar (25, windOriginRadians)))
+        |> move (scalePoint sc (fromPolar (20, windOriginRadians)))
         |> alpha 0.5
-      windAngleText = (show (abs (round player.windAngle))) ++ "&deg;" |> baseText
+      windAngleText = (show (abs (round player.windAngle))) ++ "&deg;"
+        |> scaledText (sc * 0.8)
         |> (if player.controlMode == FixedWindAngle then line Under else id)
         |> centered |> toForm
-        |> scale sc
-        |> move (scalePoint sc (fromPolar (25, windOriginRadians + pi)))
+        |> move (scalePoint sc (fromPolar (20, windOriginRadians + pi)))
         |> alpha 0.5
   in  group [windMarker, windAngleText]
 
@@ -60,23 +60,37 @@ renderWake wake sc =
       renderSegment (i,(a,b)) = segment a b |> traced style |> alpha (opacityForIndex i)
   in  group (map renderSegment pairs)
 
-renderPlayer : Player -> [Spell] -> Float -> Form
-renderPlayer player spells sc =
-  let boatPath = if(containsSpell "PoleInversion" spells) then "boat-pole-inversion" else "icon-ac72"
-      hull = image 11 20 ("/assets/images/" ++ boatPath ++ ".png") |> toForm
-        |> rotate (toRadians (player.direction + 90))
-        |> scale sc
-      helpers = if sc > 1
-        then [renderPlayerAngles sc player, renderEqualityLine player.position player.windOrigin sc]
-        else []
-      fog1 = oval 190 250
+renderBoat : String -> Float -> Form
+renderBoat filename sc =
+  let picHeight = 20
+      picWidth = 11
+      realLength = 13.45 -- length overall
+      w = realLength * picWidth / picHeight
+      scaledLength = realLength * sc
+      scaledWidth = scaledLength * picWidth / picHeight
+  in  image (round scaledWidth) (round scaledLength) ("/assets/images/" ++ filename ++ ".png") |> toForm
+
+renderFog : Float -> Player -> [Spell] -> [Form]
+renderFog sc player spells =
+  let fog1 = oval 190 250
         |> filled grey
         |> rotate (snd player.position / 60)
       fog2 = oval 170 230
         |> filled white
         |> rotate (fst player.position / 41 + 220)
         |> alpha 0.8
-      fog = if (containsSpell "Fog" spells) then [fog1, fog2] else []
+  in  if (containsSpell "Fog" spells) then [fog1, fog2] |> map (scale sc) else []
+
+renderPlayer : Player -> [Spell] -> Float -> Form
+renderPlayer player spells sc =
+  let boatPath = if(containsSpell "PoleInversion" spells) then "boat-pole-inversion" else "icon-ac72"
+      hull = renderBoat boatPath sc
+        |> rotate (toRadians (player.direction + 90))
+        --|> scale sc
+      helpers = if sc > 1
+        then [renderPlayerAngles sc player, renderEqualityLine player.position player.windOrigin sc]
+        else []
+      fog = renderFog sc player spells
       movingPart = group (helpers ++ [hull] ++ fog) |> move (scalePoint sc player.position)
       wake = renderWake player.wake sc
   in group [movingPart, wake]

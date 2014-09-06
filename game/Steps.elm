@@ -206,7 +206,7 @@ raceInputStep raceInput ({player} as gameState) =
 
 zoomStep : KeyboardInput -> GameState -> GameState
 zoomStep keyboardInput gameState =
-  let maxScale = 2.0
+  let maxScale = 3.0
       minScale = 0.5
       zoomedScale = gameState.scale + (0.02 * gameState.scale * (toFloat keyboardInput.zoom))
       newScale = if | zoomedScale < minScale -> minScale

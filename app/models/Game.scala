@@ -48,13 +48,14 @@ case class WindGenerator(
   wavelength1: Int,
   amplitude1: Int,
   wavelength2: Int,
-  amplitude2: Int
+  amplitude2: Int,
+  baseSpeed: Float // m/s
 ) {
   def windOrigin(at: DateTime): Double =
     cos(at.getMillis * 0.001 / wavelength1) * amplitude1 + cos(at.getMillis * 0.001 / wavelength2) * amplitude2
 
-  def windSpeed(at: DateTime): Double = Wind.defaultWindSpeed +
-    (cos(at.getMillis * 0.001 / wavelength1) * 5 - cos(at.getMillis * 0.001 / wavelength2) * 5) / 2
+  def windSpeed(at: DateTime): Double = baseSpeed +
+    (cos(at.getMillis * 0.001 / wavelength1) * (baseSpeed/2) - cos(at.getMillis * 0.001 / wavelength2) * (baseSpeed/2)) / 2
 }
 
 case class Course(
@@ -69,7 +70,7 @@ case class Course(
   boatWidth: Double // for collision detection, should be consistent with icon
 ) {
   lazy val ((right, top), (left, bottom)) = bounds
-  
+
   lazy val width = abs(right - left)
   lazy val height = abs(top - bottom)
 
@@ -97,14 +98,14 @@ object Course {
     upwind = Gate(2000, 100),
     downwind = Gate(-100, 100),
     laps = 2,
-    markRadius = 3,
+    markRadius = 2,
     islands = Seq(
       Island((-250, 300), 90),
       Island((150, 900), 80),
       Island((-200, 1200), 60)
     ),
     bounds = ((800,2200), (-800,-400)),
-    windGenerator = WindGenerator(8, 10, 5, 5),
+    windGenerator = WindGenerator(8, 10, 5, 5, 8),
     gustsCount = 8,
     boatWidth = 9
   )
@@ -154,8 +155,7 @@ case class Wind(
 )
 
 object Wind {
-  val defaultWindSpeed = 15
-  val default = Wind(0, defaultWindSpeed, Nil)
+  val default = Wind(0, 10, Nil)
 }
 
 case class Spell(
@@ -242,7 +242,7 @@ case class PlayerState (
   }
 
   def withSpell(spell: Spell) = copy(ownSpell = Some(spell))
-  
+
   def updateCrossedGates(course: Course, started: Boolean)(previousState: PlayerState): PlayerState = {
     val now = DateTime.now
     val step = (previousState.position, position)

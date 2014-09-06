@@ -7,6 +7,7 @@ import Game (..)
 import String
 import Text
 
+
 gateHintLabel: Int -> Form
 gateHintLabel d =
   "Next gate in " ++ (show d) ++ "m" |> baseText |> centered |> toForm
@@ -46,7 +47,7 @@ renderPolar : Player -> (Float,Float) -> Form
 renderPolar player (w,h) =
   let
     absWindAngle = abs player.windAngle
-    anglePoint a = fromPolar ((polarVelocity player.windSpeed a) * 2, toRadians a)
+    anglePoint a = fromPolar ((polarVelocity player.windSpeed a) * 4, toRadians a)
     points = map anglePoint [0..180]
     maxSpeed = 100
     polar = path points |> traced (solid white)
@@ -55,9 +56,9 @@ renderPolar player (w,h) =
     playerPoint = anglePoint absWindAngle
     playerMark = circle 2 |> filled red |> move playerPoint
     playerSegment = segment (0,0) playerPoint |> traced (solid white) |> alpha 0.3
-    windOriginText = ((show (round absWindAngle)) ++ "&deg;")
+    windOriginText = (show (round absWindAngle)) ++ "&deg;\n" ++ (show (round (mpsToKn player.velocity))) ++ "kn"
       |> baseText |> centered |> toForm
-      |> move (add playerPoint (fromPolar (20, toRadians absWindAngle))) |> alpha 0.6
+      |> move (add playerPoint (fromPolar (30, toRadians absWindAngle))) |> alpha 0.6
     playerProjection = segment playerPoint (0, snd playerPoint) |> traced (dotted white)
     legend = "PLAYER\nSPEED" |> baseText |> centered |> toForm |> move (maxSpeed/2, -maxSpeed * 0.9)
   in
@@ -77,11 +78,21 @@ renderWindWheel wind player (w,h) =
         |> baseText |> centered |> toForm
         |> rotate (windOriginRadians - pi/2)
         |> move (fromPolar (r + 20, windOriginRadians))
-      windSpeedText = ((show (round wind.speed)) ++ "kn")
+      windSpeedText = ((show (round (mpsToKn wind.speed))) ++ "kn")
         |> baseText |> centered |> toForm
       legend = "WIND" |> baseText |> centered |> toForm |> move (0, -50)
 
   in  group [c, windMarker, windOriginText, windSpeedText, legend] |> move (w/2 - 50, (h/2 - 120)) |> alpha 0.8
+
+renderScale : Float -> (Float,Float) -> Form
+renderScale sc (w,h) =
+  let lineWidth = 100.0
+      s = segment (-lineWidth, 0) (0, 0) |> traced (solid white)
+      carets = map (\y -> segment (y, 0) (y, 5) |> traced (solid white)) [-lineWidth, 0]
+      t = (show (round (lineWidth / sc))) ++ "m"
+        |> baseText |> centered |> toForm
+        |> move (-lineWidth / 2, 15)
+  in  group ([s,t] ++ carets) |> move (w / 2 - 20, -h / 2 + 20)
 
 renderStockSpell : Spell -> (Float, Float) -> Form
 renderStockSpell spell (w,h) =
@@ -157,6 +168,7 @@ renderControls ({wind,player,opponents,course,playerSpell,now,countdown} as game
         [ renderLapsCount dims course player
         , renderPolar player dims
         , renderWindWheel wind player dims
+        , renderScale gameState.scale dims
         ]
       downwindHint = if (player.nextGate == Just Downwind)
         then renderGateHint course.downwind dims player.center now
