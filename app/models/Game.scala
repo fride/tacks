@@ -42,6 +42,7 @@ case class PlayerState (
   isGrounded: Boolean,
   heading: Double,
   velocity: Double,
+  turn: Double,
   vmgValue: Double,
   windAngle: Double,
   windOrigin: Double,
@@ -58,8 +59,8 @@ case class PlayerState (
 
 object PlayerState {
   def initial(player: Player) = PlayerState(
-    player, DateTime.now.getMillis, (0,0), false, 0, 0, 0, 0, 0, 0, Vmg(0, 0, 0), Vmg(0, 0, 0), 0, Seq(),
-    FixedHeading, None, Seq(), Some(StartLine))
+    player, DateTime.now.getMillis, (0,0), false, 0, 0, 0, 0, 0, 0, 0, Vmg(0, 0, 0), Vmg(0, 0, 0), 0, Nil,
+    FixedHeading, None, Nil, Some(StartLine))
 }
 
 case class PlayerUpdate(player: Player, input: PlayerInput)

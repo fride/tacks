@@ -96,6 +96,7 @@ object JsonFormats {
       (__ \ 'isGrounded).format[Boolean] and
       (__ \ 'heading).format[Double] and
       (__ \ 'velocity).format[Double] and
+      (__ \ 'turn).format[Double] and
       (__ \ 'vmgValue).format[Double] and
       (__ \ 'windAngle).format[Double] and
       (__ \ 'windOrigin).format[Double] and
