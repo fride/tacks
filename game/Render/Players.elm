@@ -102,7 +102,7 @@ renderPlayer displayWindShadow shadowLength state =
   let
     hull = rotateHull state.heading baseHull
     windShadow = if displayWindShadow
-      then renderWindShadow shadowLength (asOpponentState state)
+      then renderWindShadow shadowLength (asOpponentState 0 state)
       else emptyForm
     angles = renderPlayerAngles state
     vmgSign = renderVmgSign state
@@ -159,4 +159,3 @@ renderPlayers ({playerState,opponents,ghosts,course,center,gameMode} as gameStat
       ]
   in
     group forms
-

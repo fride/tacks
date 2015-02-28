@@ -108,7 +108,6 @@ type GateLocation = DownwindGate | UpwindGate | StartLine
 
 type alias PlayerState =
   { player:          Player
-  , time:            Float
   , position:        Point
   , isGrounded:      Bool
   , isTurning:       Bool
@@ -134,9 +133,9 @@ windAngleOnVmg s = if s.windAngle < 0 then -(closestVmgAngle s) else closestVmgA
 headingOnVmg s = ensure360 (s.windOrigin + closestVmgAngle s)
 deltaToVmg s = s.windAngle - windAngleOnVmg s
 
-asOpponentState : PlayerState -> OpponentState
-asOpponentState {time,position,heading,velocity,windAngle,windOrigin,shadowDirection,crossedGates} =
-  { time = time
+asOpponentState : Time -> PlayerState -> OpponentState
+asOpponentState now {position,heading,velocity,windAngle,windOrigin,shadowDirection,crossedGates} =
+  { time = now
   , position = position
   , heading = heading
   , velocity = velocity
@@ -191,6 +190,22 @@ type alias Wind =
 
 type GameMode = Race | TimeTrial
 
+type alias RaceChat =
+  { active: Bool
+  , buffer: String
+  , messages: List (String, String)
+  }
+
+type alias Timing =
+  { now:         Time
+  , serverNow:   Time
+  , countdown:   Float
+  , startTime:   Maybe Time
+  , creationTime: Time
+  , localTime:   Time
+  , roundTripDelay: Float
+  }
+
 type alias GameState =
   { wind:        Wind
   , playerState: PlayerState
@@ -200,27 +215,22 @@ type alias GameState =
   , ghosts:      List GhostState
   , course:      Course
   , leaderboard: List PlayerTally
-  , now:         Time
-  , serverNow:   Time
-  , countdown:   Float
-  , startTime:   Maybe Time
-  , creationTime: Time
   , isMaster:    Bool
   , gameMode:    GameMode
   , live:        Bool
-  , localTime:   Time
-  , roundTripDelay: Float
+  , timing:      Timing
+  , chat:        RaceChat
   }
 
 serverClock : GameState -> Float
-serverClock {now,startTime,creationTime,gameMode,countdown} =
+serverClock {timing,gameMode} =
   case gameMode of
     Race ->
-      now - creationTime
+      timing.now - timing.creationTime
     TimeTrial ->
-      case startTime of
+      case timing.startTime of
         Just t ->
-          now - t + countdown * 1000
+          timing.now - t + timing.countdown * 1000
         Nothing ->
           0
 
@@ -248,10 +258,10 @@ defaultPlayer =
   , vmgMagnet = 0
   }
 
-defaultPlayerState : Player -> Float -> PlayerState
-defaultPlayerState player now =
+defaultPlayerState : Player -> PlayerState
+defaultPlayerState player =
   { player          = player
-  , time            = now
+  -- , time            = now
   , position        = (0,0)
   , isGrounded      = False
   , isTurning       = False
@@ -295,26 +305,39 @@ defaultWind now =
   , gustCounter = 0
   }
 
+defaultTiming : Float -> Float -> Float -> Timing
+defaultTiming now countdown creationTime =
+  { now         = now
+  , serverNow   = now
+  , countdown   = countdown
+  , startTime   = Nothing
+  , creationTime = creationTime
+  , localTime   = 0
+  , roundTripDelay = 0
+  }
+
+defaultChat : RaceChat
+defaultChat =
+  { active = False
+  , buffer = ""
+  , messages = []
+  }
+
 defaultGame : GameSetup -> GameState
 defaultGame {now,creationTime,course,player,timeTrial,countdown} =
   { wind        = defaultWind now
-  , playerState = defaultPlayerState player now
+  , playerState = defaultPlayerState player
   , center      = (0,0)
   , wake        = []
   , opponents   = []
   , ghosts      = []
   , course      = course
   , leaderboard = []
-  , now         = now
-  , serverNow   = now
-  , countdown   = countdown
-  , startTime   = Nothing
-  , creationTime = creationTime
   , isMaster    = False
   , gameMode    = if timeTrial then TimeTrial else Race
   , live        = False
-  , localTime   = 0
-  , roundTripDelay = 0
+  , timing      = defaultTiming now countdown creationTime
+  , chat        = defaultChat
   }
 
 getGateMarks : Gate -> (Point,Point)
@@ -330,17 +353,13 @@ findOpponent opponents id =
   in  if isEmpty filtered then Nothing else Just (head filtered)
 
 raceTime : GameState -> Float
-raceTime {now,startTime} =
-  case startTime of
-    Just t -> now - t
+raceTime {timing} =
+  case timing.startTime of
+    Just t -> timing.now - t
     Nothing -> 0
 
 isStarted : GameState -> Bool
-isStarted {now,startTime} =
-  case startTime of
-    Just t -> now >= t
+isStarted {timing} =
+  case timing.startTime of
+    Just t -> timing.now >= t
     Nothing -> False
-
---isStarted : Maybe Time -> Bool
---isStarted maybeCountdown = M.map (\n -> n <= 0) maybeCountdown |> M.withDefault False
-

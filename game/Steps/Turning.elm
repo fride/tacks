@@ -16,7 +16,7 @@ fast = 0.1
 turningStep : Float -> KeyboardInput -> PlayerState -> PlayerState
 turningStep elapsed input state =
   let
-    lock = input.lock || input.arrows.y > 0
+    lock = isLocking input
 
     targetReached = tackTargetReached state
     tackTarget = getTackTarget state input targetReached

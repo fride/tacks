@@ -67,11 +67,11 @@ formatTimer t showMs =
 
 
 gameTitle : Game.GameState -> String
-gameTitle {startTime,now,opponents} =
-  case startTime of
+gameTitle {timing,opponents} =
+  case timing.startTime of
     Just t ->
-      if now < t then
-        formatTimer (t - now) False
+      if timing.now < t then
+        formatTimer (t - timing.now) False
       else
         "Started"
     Nothing ->

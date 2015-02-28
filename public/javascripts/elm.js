@@ -1,26 +1,4 @@
 var Elm = Elm || { Native: {} };
-Elm.AnimationFrame = Elm.AnimationFrame || {};
-Elm.AnimationFrame.make = function (_elm) {
-   "use strict";
-   _elm.AnimationFrame = _elm.AnimationFrame || {};
-   if (_elm.AnimationFrame.values)
-   return _elm.AnimationFrame.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
-   $moduleName = "AnimationFrame",
-   $Native$AnimationFrame = Elm.Native.AnimationFrame.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm);
-   var frameWhen = $Native$AnimationFrame.frameWhen;
-   var frame = frameWhen($Signal.constant(true));
-   _elm.AnimationFrame.values = {_op: _op
-                                ,frameWhen: frameWhen
-                                ,frame: frame};
-   return _elm.AnimationFrame.values;
-};
 Elm.Array = Elm.Array || {};
 Elm.Array.make = function (_elm) {
    "use strict";
@@ -2494,27 +2472,27 @@ Elm.Game.make = function (_elm) {
    var isStarted = function (_v0) {
       return function () {
          return function () {
-            var _v2 = _v0.startTime;
+            var _v2 = _v0.timing.startTime;
             switch (_v2.ctor)
             {case "Just":
-               return _U.cmp(_v0.now,
+               return _U.cmp(_v0.timing.now,
                  _v2._0) > -1;
                case "Nothing": return false;}
             _U.badCase($moduleName,
-            "between lines 340 and 342");
+            "between lines 364 and 366");
          }();
       }();
    };
    var raceTime = function (_v4) {
       return function () {
          return function () {
-            var _v6 = _v4.startTime;
+            var _v6 = _v4.timing.startTime;
             switch (_v6.ctor)
             {case "Just":
-               return _v4.now - _v6._0;
+               return _v4.timing.now - _v6._0;
                case "Nothing": return 0;}
             _U.badCase($moduleName,
-            "between lines 334 and 336");
+            "between lines 358 and 360");
          }();
       }();
    };
@@ -2547,6 +2525,22 @@ Elm.Game.make = function (_elm) {
                   ,_0: gate.width / 2
                   ,_1: gate.y}};
    };
+   var defaultChat = {_: {}
+                     ,active: false
+                     ,buffer: ""
+                     ,messages: _L.fromArray([])};
+   var defaultTiming = F3(function (now,
+   countdown,
+   creationTime) {
+      return {_: {}
+             ,countdown: countdown
+             ,creationTime: creationTime
+             ,localTime: 0
+             ,now: now
+             ,roundTripDelay: 0
+             ,serverNow: now
+             ,startTime: $Maybe.Nothing};
+   });
    var defaultWind = function (now) {
       return {_: {}
              ,gustCounter: 0
@@ -2589,19 +2583,19 @@ Elm.Game.make = function (_elm) {
             var _v10 = _v8.gameMode;
             switch (_v10.ctor)
             {case "Race":
-               return _v8.now - _v8.creationTime;
+               return _v8.timing.now - _v8.timing.creationTime;
                case "TimeTrial":
                return function () {
-                    var _v11 = _v8.startTime;
+                    var _v11 = _v8.timing.startTime;
                     switch (_v11.ctor)
                     {case "Just":
-                       return _v8.now - _v11._0 + _v8.countdown * 1000;
+                       return _v8.timing.now - _v11._0 + _v8.timing.countdown * 1000;
                        case "Nothing": return 0;}
                     _U.badCase($moduleName,
-                    "between lines 221 and 225");
+                    "between lines 232 and 236");
                  }();}
             _U.badCase($moduleName,
-            "between lines 217 and 225");
+            "between lines 228 and 236");
          }();
       }();
    };
@@ -2618,35 +2612,20 @@ Elm.Game.make = function (_elm) {
                                  return function (k) {
                                     return function (l) {
                                        return function (m) {
-                                          return function (n) {
-                                             return function (o) {
-                                                return function (p) {
-                                                   return function (q) {
-                                                      return function (r) {
-                                                         return {_: {}
-                                                                ,center: d
-                                                                ,countdown: k
-                                                                ,course: g
-                                                                ,creationTime: m
-                                                                ,gameMode: o
-                                                                ,ghosts: f
-                                                                ,isMaster: n
-                                                                ,leaderboard: h
-                                                                ,live: p
-                                                                ,localTime: q
-                                                                ,now: i
-                                                                ,opponents: e
-                                                                ,playerState: b
-                                                                ,roundTripDelay: r
-                                                                ,serverNow: j
-                                                                ,startTime: l
-                                                                ,wake: c
-                                                                ,wind: a};
-                                                      };
-                                                   };
-                                                };
-                                             };
-                                          };
+                                          return {_: {}
+                                                 ,center: d
+                                                 ,chat: m
+                                                 ,course: g
+                                                 ,gameMode: j
+                                                 ,ghosts: f
+                                                 ,isMaster: i
+                                                 ,leaderboard: h
+                                                 ,live: k
+                                                 ,opponents: e
+                                                 ,playerState: b
+                                                 ,timing: l
+                                                 ,wake: c
+                                                 ,wind: a};
                                        };
                                     };
                                  };
@@ -2660,6 +2639,30 @@ Elm.Game.make = function (_elm) {
          };
       };
    };
+   var Timing = F7(function (a,
+   b,
+   c,
+   d,
+   e,
+   f,
+   g) {
+      return {_: {}
+             ,countdown: c
+             ,creationTime: e
+             ,localTime: f
+             ,now: a
+             ,roundTripDelay: g
+             ,serverNow: b
+             ,startTime: d};
+   });
+   var RaceChat = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,active: a
+             ,buffer: b
+             ,messages: c};
+   });
    var TimeTrial = {ctor: "TimeTrial"};
    var Race = {ctor: "Race"};
    var Wind = F4(function (a,
@@ -2730,19 +2733,20 @@ Elm.Game.make = function (_elm) {
              ,windAngle: e
              ,windOrigin: f};
    });
-   var asOpponentState = function (_v13) {
+   var asOpponentState = F2(function (now,
+   _v13) {
       return function () {
          return {_: {}
                 ,crossedGates: _v13.crossedGates
                 ,heading: _v13.heading
                 ,position: _v13.position
                 ,shadowDirection: _v13.shadowDirection
-                ,time: _v13.time
+                ,time: now
                 ,velocity: _v13.velocity
                 ,windAngle: _v13.windAngle
                 ,windOrigin: _v13.windOrigin};
       }();
-   };
+   });
    var upwind = function (s) {
       return _U.cmp($Basics.abs(s.windAngle),
       90) < 0;
@@ -2778,28 +2782,25 @@ Elm.Game.make = function (_elm) {
                                                 return function (p) {
                                                    return function (q) {
                                                       return function (r) {
-                                                         return function (s) {
-                                                            return {_: {}
-                                                                   ,controlMode: p
-                                                                   ,crossedGates: r
-                                                                   ,downwindVmg: l
-                                                                   ,heading: f
-                                                                   ,isGrounded: d
-                                                                   ,isTurning: e
-                                                                   ,nextGate: s
-                                                                   ,player: a
-                                                                   ,position: c
-                                                                   ,shadowDirection: n
-                                                                   ,tackTarget: q
-                                                                   ,time: b
-                                                                   ,trail: o
-                                                                   ,upwindVmg: m
-                                                                   ,velocity: g
-                                                                   ,vmgValue: h
-                                                                   ,windAngle: i
-                                                                   ,windOrigin: j
-                                                                   ,windSpeed: k};
-                                                         };
+                                                         return {_: {}
+                                                                ,controlMode: o
+                                                                ,crossedGates: q
+                                                                ,downwindVmg: k
+                                                                ,heading: e
+                                                                ,isGrounded: c
+                                                                ,isTurning: d
+                                                                ,nextGate: r
+                                                                ,player: a
+                                                                ,position: b
+                                                                ,shadowDirection: m
+                                                                ,tackTarget: p
+                                                                ,trail: n
+                                                                ,upwindVmg: l
+                                                                ,velocity: f
+                                                                ,vmgValue: g
+                                                                ,windAngle: h
+                                                                ,windOrigin: i
+                                                                ,windSpeed: j};
                                                       };
                                                    };
                                                 };
@@ -2822,8 +2823,7 @@ Elm.Game.make = function (_elm) {
    var UpwindGate = {ctor: "UpwindGate"};
    var DownwindGate = {ctor: "DownwindGate"};
    var FixedHeading = {ctor: "FixedHeading"};
-   var defaultPlayerState = F2(function (player,
-   now) {
+   var defaultPlayerState = function (player) {
       return {_: {}
              ,controlMode: FixedHeading
              ,crossedGates: _L.fromArray([])
@@ -2838,7 +2838,6 @@ Elm.Game.make = function (_elm) {
                         ,_1: 0}
              ,shadowDirection: 0
              ,tackTarget: $Maybe.Nothing
-             ,time: now
              ,trail: _L.fromArray([])
              ,upwindVmg: defaultVmg
              ,velocity: 0
@@ -2846,30 +2845,26 @@ Elm.Game.make = function (_elm) {
              ,windAngle: 0
              ,windOrigin: 0
              ,windSpeed: 0};
-   });
+   };
    var defaultGame = function (_v15) {
       return function () {
          return {_: {}
                 ,center: {ctor: "_Tuple2"
                          ,_0: 0
                          ,_1: 0}
-                ,countdown: _v15.countdown
+                ,chat: defaultChat
                 ,course: _v15.course
-                ,creationTime: _v15.creationTime
                 ,gameMode: _v15.timeTrial ? TimeTrial : Race
                 ,ghosts: _L.fromArray([])
                 ,isMaster: false
                 ,leaderboard: _L.fromArray([])
                 ,live: false
-                ,localTime: 0
-                ,now: _v15.now
                 ,opponents: _L.fromArray([])
-                ,playerState: A2(defaultPlayerState,
-                _v15.player,
-                _v15.now)
-                ,roundTripDelay: 0
-                ,serverNow: _v15.now
-                ,startTime: $Maybe.Nothing
+                ,playerState: defaultPlayerState(_v15.player)
+                ,timing: A3(defaultTiming,
+                _v15.now,
+                _v15.countdown,
+                _v15.creationTime)
                 ,wake: _L.fromArray([])
                 ,wind: defaultWind(_v15.now)};
       }();
@@ -3076,6 +3071,8 @@ Elm.Game.make = function (_elm) {
                       ,Wind: Wind
                       ,Race: Race
                       ,TimeTrial: TimeTrial
+                      ,RaceChat: RaceChat
+                      ,Timing: Timing
                       ,GameState: GameState
                       ,serverClock: serverClock
                       ,GameSetup: GameSetup
@@ -3084,6 +3081,8 @@ Elm.Game.make = function (_elm) {
                       ,defaultPlayerState: defaultPlayerState
                       ,defaultGate: defaultGate
                       ,defaultWind: defaultWind
+                      ,defaultTiming: defaultTiming
+                      ,defaultChat: defaultChat
                       ,defaultGame: defaultGame
                       ,getGateMarks: getGateMarks
                       ,findPlayerGhost: findPlayerGhost
@@ -5209,15 +5208,17 @@ Elm.Inputs.make = function (_elm) {
              ,localTime: c
              ,state: a};
    });
-   var GameInput = F4(function (a,
+   var GameInput = F5(function (a,
    b,
    c,
-   d) {
+   d,
+   e) {
       return {_: {}
+             ,chatInput: c
              ,clock: a
              ,keyboardInput: b
-             ,raceInput: d
-             ,windowInput: c};
+             ,raceInput: e
+             ,windowInput: d};
    });
    var Clock = F2(function (a,b) {
       return {_: {}
@@ -5244,9 +5245,19 @@ Elm.Inputs.make = function (_elm) {
              ,startTime: b
              ,wind: c};
    });
+   var ChatInput = F2(function (a,
+   b) {
+      return {_: {}
+             ,escapeChat: b
+             ,submitChat: a};
+   });
+   var chatInput = A3($Signal.map2,
+   ChatInput,
+   $Keyboard.enter,
+   $Keyboard.isDown(27));
    var isLocking = function (ki) {
       return _U.cmp(ki.arrows.y,
-      0) > 0 || ki.lock;
+      0) > 0;
    };
    var manualTurn = function (ki) {
       return !_U.eq(ki.arrows.x,0);
@@ -5257,22 +5268,19 @@ Elm.Inputs.make = function (_elm) {
    var isSubtleTurning = function (ki) {
       return manualTurn(ki) && ki.subtleTurn;
    };
-   var KeyboardInput = F5(function (a,
+   var KeyboardInput = F4(function (a,
    b,
    c,
-   d,
-   e) {
+   d) {
       return {_: {}
              ,arrows: a
-             ,lock: b
-             ,startCountdown: e
-             ,subtleTurn: d
-             ,tack: c};
+             ,startCountdown: d
+             ,subtleTurn: c
+             ,tack: b};
    });
-   var keyboardInput = A6($Signal.map5,
+   var keyboardInput = A5($Signal.map4,
    KeyboardInput,
    $Keyboard.arrows,
-   $Keyboard.enter,
    $Keyboard.space,
    $Keyboard.shift,
    $Keyboard.isDown($Char.toCode(_U.chr("C"))));
@@ -5288,6 +5296,8 @@ Elm.Inputs.make = function (_elm) {
                         ,isSubtleTurning: isSubtleTurning
                         ,isLocking: isLocking
                         ,keyboardInput: keyboardInput
+                        ,ChatInput: ChatInput
+                        ,chatInput: chatInput
                         ,RaceInput: RaceInput
                         ,Clock: Clock
                         ,GameInput: GameInput
@@ -6123,10 +6133,11 @@ Elm.Main.make = function (_elm) {
                                                                                                                                                                                                                  v.clientTime)} : _U.badPort("an object with fields \'serverNow\', \'startTime\', \'wind\', \'opponents\', \'ghosts\', \'leaderboard\', \'isMaster\', \'initial\', \'clientTime\'",
       v);
    }));
-   var input = $Signal.sampleOn(clock)(A5($Signal.map4,
+   var input = $Signal.sampleOn(clock)(A6($Signal.map5,
    $Inputs.GameInput,
    clock,
    $Inputs.keyboardInput,
+   $Inputs.chatInput,
    $Window.dimensions,
    raceInput));
    var gameState = A3($Signal.foldp,
@@ -6159,7 +6170,6 @@ Elm.Main.make = function (_elm) {
                      })}
              ,input: {arrows: {x: v.input.arrows.x
                               ,y: v.input.arrows.y}
-                     ,lock: v.input.lock
                      ,tack: v.input.tack
                      ,subtleTurn: v.input.subtleTurn
                      ,startCountdown: v.input.startCountdown}
@@ -6168,10 +6178,10 @@ Elm.Main.make = function (_elm) {
    A4($Signal.map3,
    $Inputs.PlayerOutput,
    A2($Signal._op["<~"],
-   function ($) {
-      return $Game.asOpponentState(function (_) {
-         return _.playerState;
-      }($));
+   function (gs) {
+      return A2($Game.asOpponentState,
+      gs.timing.now,
+      gs.playerState);
    },
    gameState),
    A2($Signal._op["<~"],
@@ -6180,8 +6190,12 @@ Elm.Main.make = function (_elm) {
    },
    input),
    A2($Signal._op["<~"],
-   function (_) {
-      return _.localTime;
+   function ($) {
+      return function (_) {
+         return _.localTime;
+      }(function (_) {
+         return _.timing;
+      }($));
    },
    gameState)));
    _elm.Main.values = {_op: _op
@@ -6312,53 +6326,6 @@ Elm.Messages.make = function (_elm) {
                           ,translator: translator};
    return _elm.Messages.values;
 };
-Elm.Native.AnimationFrame = {};
-Elm.Native.AnimationFrame.make = function(elm) {
-
-  elm.Native = elm.Native || {};
-  elm.Native.AnimationFrame = elm.Native.AnimationFrame || {};
-  if (elm.Native.AnimationFrame.values) return elm.Native.AnimationFrame.values;
-
-  var Signal = Elm.Signal.make(elm);
-  var NS = Elm.Native.Signal.make(elm);
-
-  // TODO Should be elm.requestAnimationFrame, and should be shimmed if we care
-  // about IE9. Do we care about IE9?
-  var requestAnimationFrame = window.requestAnimationFrame || function () {};
-  var cancelAnimationFrame = window.cancelAnimationFrame || function () {};
-
-  function frameWhen(isOn) {
-    var prev = 0, curr = prev, diff = 0, wasOn = true;
-    var ticker = NS.input(diff);
-    function tick(zero) {
-      return function(curr) {
-        diff = zero ? 0 : curr - prev;
-        if (prev > curr) {
-          diff = 0;
-        }
-        prev = curr;
-        elm.notify(ticker.id, diff);
-      };
-    }
-    var rafID = 0;
-    function f(isOn, t) {
-      if (isOn) {
-        rafID = requestAnimationFrame(tick(!wasOn && isOn));
-      } else if (wasOn) {
-        cancelAnimationFrame(rafID);
-      }
-      wasOn = isOn;
-      return t;
-    }
-    return A3( Signal.map2, F2(f), isOn, ticker );
-  }
-
-  return elm.Native.AnimationFrame.values = {
-    frameWhen : frameWhen
-  };
-
-};
-
 Elm.Native.Array = {};
 Elm.Native.Array.make = function(elm) {
     elm.Native = elm.Native || {};
@@ -13777,13 +13744,13 @@ Elm.Render.Controls.make = function (_elm) {
             _v8.course.downwind,
             dims,
             _v8.center,
-            _v8.now) : $Maybe.Nothing;
+            _v8.timing.now) : $Maybe.Nothing;
             var upwindHint = _U.eq(_v8.playerState.nextGate,
             $Maybe.Just($Game.UpwindGate)) ? A4(renderGateHint,
             _v8.course.upwind,
             dims,
             _v8.center,
-            _v8.now) : $Maybe.Nothing;
+            _v8.timing.now) : $Maybe.Nothing;
             return $Graphics$Collage.group($Core.compact(_L.fromArray([downwindHint
                                                                       ,upwindHint])));
          }();
@@ -13949,12 +13916,12 @@ Elm.Render.Course.make = function (_elm) {
                                      ,A4(renderDownwind,
                                      _v4.playerState,
                                      _v4.course,
-                                     _v4.now,
+                                     _v4.timing.now,
                                      $Game.isStarted(_v4))
                                      ,A3(renderUpwind,
                                      _v4.playerState,
                                      _v4.course,
-                                     _v4.now)
+                                     _v4.timing.now)
                                      ,renderGusts(_v4.wind)]);
             return $Graphics$Collage.group(forms);
          }();
@@ -14177,11 +14144,11 @@ Elm.Render.Dashboard.make = function (_elm) {
       return function () {
          return function () {
             var s = function () {
-               var _v24 = _v22.startTime;
+               var _v24 = _v22.timing.startTime;
                switch (_v24.ctor)
                {case "Just":
                   return _U.cmp(_v24._0,
-                    _v22.now) > 0 ? "be ready" : getFinishingStatus(_v22);
+                    _v22.timing.now) > 0 ? "be ready" : getFinishingStatus(_v22);
                   case "Nothing":
                   return _v22.isMaster ? $Render$Utils.startCountdownMessage : "";}
                _U.badCase($moduleName,
@@ -14194,13 +14161,13 @@ Elm.Render.Dashboard.make = function (_elm) {
    var getTimer = function (_v26) {
       return function () {
          return function () {
-            var _v28 = _v26.startTime;
+            var _v28 = _v26.timing.startTime;
             switch (_v28.ctor)
             {case "Just":
                return function () {
                     var timer = $Core.isNothing(_v26.playerState.nextGate) ? A2($Maybe.withDefault,
                     0,
-                    $Core.headMaybe(_v26.playerState.crossedGates)) : _v28._0 - _v26.now;
+                    $Core.headMaybe(_v26.playerState.crossedGates)) : _v28._0 - _v26.timing.now;
                     return A2($Render$Utils.formatTimer,
                     timer,
                     $Core.isNothing(_v26.playerState.nextGate));
@@ -15018,7 +14985,9 @@ Elm.Render.Players.make = function (_elm) {
          var angles = renderPlayerAngles(state);
          var windShadow = displayWindShadow ? A2(renderWindShadow,
          shadowLength,
-         $Game.asOpponentState(state)) : $Render$Utils.emptyForm;
+         A2($Game.asOpponentState,
+         0,
+         state)) : $Render$Utils.emptyForm;
          var hull = A2(rotateHull,
          state.heading,
          baseHull);
@@ -15128,12 +15097,12 @@ Elm.Render.Utils.make = function (_elm) {
    var gameTitle = function (_v0) {
       return function () {
          return function () {
-            var _v2 = _v0.startTime;
+            var _v2 = _v0.timing.startTime;
             switch (_v2.ctor)
             {case "Just":
-               return _U.cmp(_v0.now,
+               return _U.cmp(_v0.timing.now,
                  _v2._0) < 0 ? A2(formatTimer,
-                 _v2._0 - _v0.now,
+                 _v2._0 - _v0.timing.now,
                  false) : "Started";
                case "Nothing":
                return A2($Basics._op["++"],
@@ -15561,7 +15530,6 @@ Elm.Steps.make = function (_elm) {
    $moduleName = "Steps",
    $Basics = Elm.Basics.make(_elm),
    $Core = Elm.Core.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
    $Game = Elm.Game.make(_elm),
    $Geo = Elm.Geo.make(_elm),
    $Inputs = Elm.Inputs.make(_elm),
@@ -15572,24 +15540,18 @@ Elm.Steps.make = function (_elm) {
    $Steps$Turning = Elm.Steps.Turning.make(_elm),
    $Steps$Vmg = Elm.Steps.Vmg.make(_elm),
    $Steps$Wind = Elm.Steps.Wind.make(_elm);
-   var playerTimeStep = F2(function (elapsed,
-   state) {
-      return _U.replace([["time"
-                         ,state.time + elapsed]],
-      state);
-   });
    var playerStep = F3(function (keyboardInput,
    elapsed,
    gameState) {
       return function () {
-         var playerState = playerTimeStep(elapsed)(A2($Steps$GateCrossing.gateCrossingStep,
+         var playerState = A2($Steps$GateCrossing.gateCrossingStep,
          gameState.playerState,
          gameState)(A2($Steps$Moving.movingStep,
          elapsed,
          gameState.course)($Steps$Vmg.vmgStep($Steps$Wind.windStep(gameState)(A3($Steps$Turning.turningStep,
          elapsed,
          keyboardInput,
-         gameState.playerState))))));
+         gameState.playerState)))));
          return _U.replace([["playerState"
                             ,playerState]],
          gameState);
@@ -15664,12 +15626,9 @@ Elm.Steps.make = function (_elm) {
                initial = $.initial,
                clientTime = $.clientTime;
                var stalled = _U.eq(serverNow,
-               _v3.serverNow);
-               var roundTripDelay = stalled ? _v3.roundTripDelay : _v2.time - clientTime;
-               var now = _v3.live ? _v3.now + _v2.delta : serverNow;
-               var newPlayerState = _U.replace([["time"
-                                                ,now]],
-               _v3.playerState);
+               _v3.timing.serverNow);
+               var roundTripDelay = stalled ? _v3.timing.roundTripDelay : _v2.time - clientTime;
+               var now = _v3.live ? _v3.timing.now + _v2.delta : serverNow;
                var updatedOpponents = A3(updateOpponents,
                _v3.opponents,
                _v2.delta,
@@ -15678,28 +15637,28 @@ Elm.Steps.make = function (_elm) {
                   var _v6 = _v3.gameMode;
                   switch (_v6.ctor)
                   {case "Race":
-                     return $Basics.not(initial) && $Basics.not(_v3.live) ? A2($Debug.log,
-                       "raceInput.wind",
-                       raceInput.wind) : _v3.wind;
+                     return $Basics.not(initial) && $Basics.not(_v3.live) ? raceInput.wind : _v3.wind;
                      case "TimeTrial":
                      return _v3.wind;}
                   _U.badCase($moduleName,
-                  "between lines 157 and 166");
+                  "between lines 155 and 164");
                }();
+               var newTiming = _U.replace([["serverNow"
+                                           ,serverNow]
+                                          ,["now",now]
+                                          ,["startTime",startTime]
+                                          ,["localTime",_v2.time]
+                                          ,["roundTripDelay"
+                                           ,roundTripDelay]],
+               _v3.timing);
                return _U.replace([["opponents"
                                   ,updatedOpponents]
                                  ,["ghosts",ghosts]
                                  ,["wind",wind]
                                  ,["leaderboard",leaderboard]
-                                 ,["serverNow",serverNow]
-                                 ,["now",now]
-                                 ,["playerState",newPlayerState]
-                                 ,["startTime",startTime]
                                  ,["isMaster",isMaster]
                                  ,["live",$Basics.not(initial)]
-                                 ,["localTime",_v2.time]
-                                 ,["roundTripDelay"
-                                  ,roundTripDelay]],
+                                 ,["timing",newTiming]],
                _v3);
             }();
          }();
@@ -15764,7 +15723,7 @@ Elm.Steps.make = function (_elm) {
                switch (_v15.ctor)
                {case "Just":
                   return function () {
-                       var creationTimeSeconds = $Basics.toFloat($Basics.floor(_v13.creationTime / 1000));
+                       var creationTimeSeconds = $Basics.toFloat($Basics.floor(_v13.timing.creationTime / 1000));
                        var gustSeconds = $Basics.toFloat($Basics.floor(nextGustTime / 1000));
                        var seed = gustSeconds * creationTimeSeconds + creationTimeSeconds;
                        var position = {ctor: "_Tuple2"
@@ -15863,7 +15822,6 @@ Elm.Steps.make = function (_elm) {
                        ,updateOpponent: updateOpponent
                        ,updateOpponents: updateOpponents
                        ,raceInputStep: raceInputStep
-                       ,playerTimeStep: playerTimeStep
                        ,playerStep: playerStep
                        ,stepGame: stepGame};
    return _elm.Steps.values;
@@ -16229,8 +16187,7 @@ Elm.Steps.Turning.make = function (_elm) {
          var windAngle = A2($Geo.angleDelta,
          heading,
          state.windOrigin);
-         var lock = input.lock || _U.cmp(input.arrows.y,
-         0) > 0;
+         var lock = $Inputs.isLocking(input);
          var newControlMode = $Inputs.manualTurn(input) ? $Game.FixedHeading : lock || targetReached ? $Game.FixedAngle : state.controlMode;
          return _U.replace([["heading"
                             ,heading]

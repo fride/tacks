@@ -106,15 +106,15 @@ getMainStatus ({gameMode, playerState} as gameState) =
 
 
 getTimer : GameState -> String
-getTimer {startTime, now, playerState} =
-  case startTime of
+getTimer {timing, playerState} =
+  case timing.startTime of
     Just t ->
       let
         timer =
           if isNothing playerState.nextGate then
             M.withDefault 0 (headMaybe playerState.crossedGates)
           else
-            t - now
+            t - timing.now
       in
         formatTimer timer (isNothing playerState.nextGate)
     Nothing -> "start pending"
@@ -123,11 +123,11 @@ getTimer {startTime, now, playerState} =
 -- Sub status (normal font size)
 
 getSubStatus : GameState -> Element
-getSubStatus ({startTime,now,isMaster,playerState,course,gameMode} as gameState) =
+getSubStatus ({timing,isMaster,playerState,course,gameMode} as gameState) =
   let
-    s = case startTime of
+    s = case timing.startTime of
       Just t ->
-        if t > now
+        if t > timing.now
           then "be ready"
           else getFinishingStatus gameState
       Nothing ->

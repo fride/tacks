@@ -12,7 +12,6 @@ type alias UserArrows = { x: Int, y: Int }
 
 type alias KeyboardInput =
   { arrows:         UserArrows
-  , lock:           Bool
   , tack:           Bool
   , subtleTurn:     Bool
   , startCountdown: Bool
@@ -21,15 +20,24 @@ type alias KeyboardInput =
 manualTurn ki = ki.arrows.x /= 0
 isTurning ki = manualTurn ki && not ki.subtleTurn
 isSubtleTurning ki = manualTurn ki && ki.subtleTurn
-isLocking ki = ki.arrows.y > 0 || ki.lock
+isLocking ki = ki.arrows.y > 0 -- || ki.lock
 
 keyboardInput : Signal KeyboardInput
-keyboardInput = map5 KeyboardInput
+keyboardInput = map4 KeyboardInput
   Keyboard.arrows
-  Keyboard.enter
   Keyboard.space
   Keyboard.shift
   (Keyboard.isDown (Char.toCode 'C'))
+
+type alias ChatInput =
+  { submitChat:     Bool
+  , escapeChat:     Bool
+  }
+
+chatInput : Signal ChatInput
+chatInput = map2 ChatInput
+  Keyboard.enter
+  (Keyboard.isDown 27) -- ESC
 
 
 type alias RaceInput =
@@ -52,6 +60,7 @@ type alias Clock =
 type alias GameInput =
   { clock:         Clock
   , keyboardInput: KeyboardInput
+  , chatInput:     ChatInput
   , windowInput:   (Int,Int)
   , raceInput:     RaceInput
   }

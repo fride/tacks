@@ -76,14 +76,14 @@ renderIslands course =
 
 
 renderCourse : GameState -> Form
-renderCourse ({playerState,course,now,wind} as gameState) =
+renderCourse ({playerState,course,wind,timing} as gameState) =
   let
     forms =
       [ renderBounds course.area
       , renderLaylines wind course playerState
       , renderIslands course
-      , renderDownwind playerState course now (isStarted gameState)
-      , renderUpwind playerState course now
+      , renderDownwind playerState course timing.now (isStarted gameState)
+      , renderUpwind playerState course timing.now
       , renderGusts wind
       ]
   in

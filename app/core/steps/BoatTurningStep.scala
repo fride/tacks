@@ -10,7 +10,7 @@ object BoatTurningStep {
   val fast = 0.1
 
   def run(previousState: PlayerState, input: KeyboardInput, elapsed: Long)(state: PlayerState): PlayerState = {
-    val lock = input.lock || input.arrows.y > 0
+    val lock = input.isLocking
 
     val targetReached = tackTargetReached(state)
 

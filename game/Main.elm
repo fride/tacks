@@ -19,10 +19,11 @@ clock : Signal Clock
 clock = map (\(time,delta) -> { time = time, delta = delta }) (timestamp (fps 30))
 
 input : Signal GameInput
-input = sampleOn clock <| map4 GameInput
+input = sampleOn clock <| map5 GameInput
   clock
   --chrono
   keyboardInput
+  chatInput
   Window.dimensions
   raceInput
 
@@ -34,9 +35,9 @@ gameState = foldp Steps.stepGame initialState input
 
 port playerOutput : Signal PlayerOutput
 port playerOutput = map3 PlayerOutput
-  (.playerState >> Game.asOpponentState <~ gameState)
+  ((\gs -> Game.asOpponentState gs.timing.now gs.playerState) <~ gameState)
   (.keyboardInput <~ input)
-  (.localTime <~ gameState)
+  (.timing >> .localTime <~ gameState)
 
 port title : Signal String
 port title = Render.Utils.gameTitle <~ gameState

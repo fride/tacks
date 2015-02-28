@@ -39,7 +39,7 @@ updateWindStep elapsed ({course,wind} as gameState) =
     { gameState | wind <- newWind }
 
 generateGustStep : GameState -> GameState
-generateGustStep ({course,wind,creationTime} as gameState) =
+generateGustStep ({course,wind,timing} as gameState) =
   let
     clock = serverClock gameState
     nextGustTime = toFloat <| wind.gustCounter * course.gustGenerator.interval * 1000
@@ -49,7 +49,7 @@ generateGustStep ({course,wind,creationTime} as gameState) =
         Just gustDef ->
           let
             gustSeconds = nextGustTime / 1000 |> floor |> toFloat
-            creationTimeSeconds = creationTime / 1000 |> floor |> toFloat
+            creationTimeSeconds = timing.creationTime / 1000 |> floor |> toFloat
             seed = gustSeconds * creationTimeSeconds + creationTimeSeconds
 
             position = (genX seed 100 course.area, areaTop course.area)
@@ -134,25 +134,23 @@ updateOpponents previousOpponents delta newOpponents =
     L.map (\o -> updateOpponent (findPrevious o) delta o) newOpponents
 
 raceInputStep : RaceInput -> Clock -> GameState -> GameState
-raceInputStep raceInput {delta,time} ({playerState} as gameState) =
+raceInputStep raceInput {delta,time} ({playerState,timing} as gameState) =
   let
     { serverNow, startTime, opponents, ghosts, leaderboard, isMaster, initial, clientTime } = raceInput
 
-    stalled = serverNow == gameState.serverNow
+    stalled = serverNow == timing.serverNow
 
     roundTripDelay = if stalled then
-      gameState.roundTripDelay
+      timing.roundTripDelay
     else
       time - clientTime
 
     now = if gameState.live then
-      gameState.now + delta
+      timing.now + delta
     else
       serverNow
 
     updatedOpponents = updateOpponents gameState.opponents delta opponents
-
-    newPlayerState = { playerState | time <- now }
 
     wind = case gameState.gameMode of
       Race ->
@@ -163,25 +161,24 @@ raceInputStep raceInput {delta,time} ({playerState} as gameState) =
       TimeTrial ->
         gameState.wind
 
+    newTiming = { timing
+      | serverNow <- serverNow
+      , now <- now
+      , startTime <- startTime
+      , localTime <- time
+      , roundTripDelay <- roundTripDelay
+      }
+
   in
     { gameState
       | opponents <- updatedOpponents
       , ghosts <- ghosts
       , wind <- wind
       , leaderboard <- leaderboard
-      , serverNow <- serverNow
-      , now <- now
-      , playerState <- newPlayerState
-      , startTime <- startTime
       , isMaster <- isMaster
       , live <- not initial
-      , localTime <- time
-      , roundTripDelay <- roundTripDelay
-    }
-
-playerTimeStep : Float -> PlayerState -> PlayerState
-playerTimeStep elapsed state =
-  { state | time <- state.time + elapsed }
+      , timing <- newTiming
+      }
 
 
 playerStep : KeyboardInput -> Float -> GameState -> GameState
@@ -193,7 +190,6 @@ playerStep keyboardInput elapsed gameState =
         |> vmgStep
         |> movingStep elapsed gameState.course
         |> gateCrossingStep gameState.playerState gameState
-        |> playerTimeStep elapsed
   in
     { gameState | playerState <- playerState }
 
